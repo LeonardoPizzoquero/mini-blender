@@ -21,9 +21,6 @@ root.configure(background=BG_COLOR)
 # Guardar o centro do polígono criado (x, y)
 centro = []
 
-# Quantidade de pontos possíveis para criar um novo polígono
-pontos = 4
-
 # Pontos do polígono criado
 poligono = []
 
@@ -44,6 +41,9 @@ def matrizT2d(tx, ty):
     return np.array([[1, 0, tx],
                      [0, 1, ty],
                      [0, 0, 1]])
+
+def poligono_invalido():
+    return not pontos_input.get().isdigit() or len(poligono) < int(pontos_input.get())
 
 # Adicionar o valor 1 para cada ponto do polígono
 def adicionar_uns(matriz):
@@ -69,8 +69,6 @@ def calcular_centro(vertices):
      return [x_central, y_central]
 
 def escala(sx, sy):
-    if (len(poligono) < pontos): return
-
     novo_poligono = []
     poligono_atual = adicionar_uns(poligono)
     poligono_atual = np.array(poligono_atual)
@@ -84,8 +82,6 @@ def escala(sx, sy):
     mostrar_novo_poligono(novo_poligono)
 
 def translacao(tx, ty):
-    if (len(poligono) < pontos): return
-
     novo_poligono = []
     poligono_atual = adicionar_uns(poligono)
     poligono_atual = np.array(poligono_atual)
@@ -99,8 +95,6 @@ def translacao(tx, ty):
     mostrar_novo_poligono(novo_poligono)
 
 def rotacao(teta):
-    if (len(poligono) < pontos): return
-
     matrizR2d = matrizR(teta)
     matrizT2D = matrizT2d(-centro[0], -centro[1])
     poligono_transladado = []
@@ -138,17 +132,19 @@ def criar_ponto(event):
 
 # Clicar no canvas e criar um polígono
 def callback(event):
-    if (len(poligono) < pontos):
+    if (poligono_invalido()):
         criar_ponto(event)
         poligono.append([event.x, event.y])
 
-    if (len(poligono) == pontos):
+    if (len(poligono) == int(pontos_input.get())):
         criar_ponto(event)
         centro.extend(calcular_centro(poligono))
         c.delete("all")
         c.create_polygon(poligono, fill=MAIN_COLOR)
 
 def button_click(number):
+    if (number != 1 and poligono_invalido()): return
+    
     # Limpar
     if number == 1:
         c.delete("all")
@@ -189,6 +185,11 @@ def button_click(number):
 frame = Frame(root, bg=BG_COLOR, padx=5, pady=5)
 buttons = Frame(root, bg=BG_COLOR, padx=5, pady=5)
 c = Canvas(width=WIDTH, height=HEIGHT,bg="white")
+
+# input de pontos
+pontos_input = Entry(root, width=50)
+pontos_input.insert(0, 4)	
+pontos_input.grid(column=1, row=0)
 
 #posicionando os objetos na interface
 frame.grid(row=0,column=0, padx=5, pady=5)
